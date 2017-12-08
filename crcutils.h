@@ -34,12 +34,12 @@ static_assert(bitReflect(0x04C11DB7u, 32) == 0xEDB88320, "Failed reflecting bits
 template <class T, uint8_t order, uint64_t POLYNOM>
 class CrcTable
 {
-    static constexpr uint64_t ReveredPolynom = bitReflect(POLYNOM, order);
+    static constexpr uint64_t ReversedPolynom = bitReflect(POLYNOM, order);
 
     template <class T>
     static constexpr T generateTableValueRecursive(T r, uint8_t i)
     {
-        return i < 8 ? generateTableValueRecursive((r & 0x01) ? ((r >> 1) ^ ReveredPolynom) : (r >> 1), i + 1) : r;
+        return i < 8 ? generateTableValueRecursive((r & 0x01) ? ((r >> 1) ^ ReversedPolynom) : (r >> 1), i + 1) : r;
     }
 
     static constexpr T init(uint8_t i)
@@ -101,7 +101,7 @@ constexpr CrcTable<uint64_t, 64, 0x42F0E1EBA9EA3693> Crc64ECMA;
 
 constexpr uint32_t calculateCrc32(uint32_t crc, const char* a, size_t i, size_t n)
 {
-    return i < n ? calculateCrc32((crc >> 8) ^ Crc32Ansi[(crc & 0xFF) ^ a[i]], a, i + 1, n) : crc;
+    return i < n ? calculateCrc32((crc >> 8) ^ Crc32Ansi[(crc & 0xFF) ^ static_cast<uint8_t>(a[i])], a, i + 1, n) : crc;
 }
 
 template <size_t N>
@@ -124,7 +124,7 @@ static_assert("123456789"_crc32 == 0xCBF43926, "Incorrect CRC-32!");
 
 constexpr uint64_t calculateCrc64(uint64_t crc, const char* a, size_t i, size_t n)
 {
-    return i < n ? calculateCrc64((crc >> 8) ^ Crc64ECMA[(crc & 0xFF) ^ a[i]], a, i + 1, n) : crc;
+    return i < n ? calculateCrc64((crc >> 8) ^ Crc64ECMA[(crc & 0xFF) ^ static_cast<uint8_t>(a[i])], a, i + 1, n) : crc;
 }
 
 template <size_t N>
